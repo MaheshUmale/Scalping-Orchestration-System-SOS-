@@ -1,0 +1,63 @@
+2026-01-08 18:42:42.329 [main] INFO  s.s.StaticFilesConfiguration - StaticResourceHandler configured with folder = /public
+2026-01-08 18:42:42.340 [main] INFO  com.trading.hf.ui.WebServer - Web server started on port 8080
+2026-01-08 18:42:42.378 [WebSocketSelector-26] ERROR o.j.server.WebSocketServer - Shutdown due to fatal error
+java.net.BindException: Address already in use
+	at java.base/sun.nio.ch.Net.bind0(Native Method)
+	at java.base/sun.nio.ch.Net.bind(Net.java:565)
+	at java.base/sun.nio.ch.ServerSocketChannelImpl.netBind(ServerSocketChannelImpl.java:344)
+	at java.base/sun.nio.ch.ServerSocketChannelImpl.bind(ServerSocketChannelImpl.java:301)
+	at java.base/sun.nio.ch.ServerSocketAdaptor.bind(ServerSocketAdaptor.java:89)
+	at org.java_websocket.server.WebSocketServer.doSetupSelectorAndServerThread(WebSocketServer.java:583)
+	at org.java_websocket.server.WebSocketServer.run(WebSocketServer.java:383)
+	at java.base/java.lang.Thread.run(Thread.java:1583)
+2026-01-08 18:42:42.381 [WebSocketSelector-26] ERROR c.trading.hf.ui.UISWebSocketServer - UI WebSocket error
+java.net.BindException: Address already in use
+	at java.base/sun.nio.ch.Net.bind0(Native Method)
+	at java.base/sun.nio.ch.Net.bind(Net.java:565)
+	at java.base/sun.nio.ch.ServerSocketChannelImpl.netBind(ServerSocketChannelImpl.java:344)
+	at java.base/sun.nio.ch.ServerSocketChannelImpl.bind(ServerSocketChannelImpl.java:301)
+	at java.base/sun.nio.ch.ServerSocketAdaptor.bind(ServerSocketAdaptor.java:89)
+	at org.java_websocket.server.WebSocketServer.doSetupSelectorAndServerThread(WebSocketServer.java:583)
+	at org.java_websocket.server.WebSocketServer.run(WebSocketServer.java:383)
+	at java.base/java.lang.Thread.run(Thread.java:1583)
+2026-01-08 18:42:42.387 [main] INFO  com.trading.hf.Main - DisruptorOrchestrator started with buffer size 1024.
+2026-01-08 18:42:42.397 [Thread-0] INFO  org.eclipse.jetty.util.log - Logging initialized @799ms to org.eclipse.jetty.util.log.Slf4jLog
+2026-01-08 18:42:42.450 [Thread-0] INFO  s.e.jetty.EmbeddedJettyServer - == Spark has ignited ...
+2026-01-08 18:42:42.451 [Thread-0] INFO  s.e.jetty.EmbeddedJettyServer - >> Listening on 0.0.0.0:8080
+2026-01-08 18:42:42.454 [Thread-0] INFO  org.eclipse.jetty.server.Server - jetty-9.4.48.v20220622; built: 2022-06-21T20:42:25.880Z; git: 6b67c5719d1f4371b33655ff2d047d24e171e49a; jvm 21.0.8+9-Ubuntu-0ubuntu124.04.1
+2026-01-08 18:42:42.467 [main] INFO  c.trading.hf.state.RecoveryManager - Engine state loaded.
+2026-01-08 18:42:42.499 [Thread-0] INFO  org.eclipse.jetty.server.session - DefaultSessionIdManager workerName=node0
+2026-01-08 18:42:42.499 [Thread-0] INFO  org.eclipse.jetty.server.session - No SessionScavenger set, using defaults
+2026-01-08 18:42:42.502 [Thread-0] INFO  org.eclipse.jetty.server.session - node0 Scavenging every 660000ms
+2026-01-08 18:422026-01-08 18:42:58.935 [WebSocketWorker-27] INFO  c.trading.hf.ui.UISWebSocketServer - UI WebSocket connection opened: /[0:0:0:0:0:0:0:1]:52186
+2026-01-08 18:42:59.114 [WebSocketSelector-30] INFO  c.trading.hf.ui.UISWebSocketServer - UI WebSocket connection closed: /[0:0:0:0:0:0:0:1]:52186
+or.java:349)
+	at org.eclipse.jetty.server.ServerConnector.open(ServerConnector.java:310)
+	at org.eclipse.jetty.server.AbstractNetworkConnector.doStart(AbstractNetworkConnector.java:80)
+	at org.eclipse.jetty.server.ServerConnector.doStart(ServerConnector.java:234)
+	at org.eclipse.jetty.util.component.AbstractLifeCycle.start(AbstractLifeCycle.java:73)
+	at org.eclipse.jetty.server.Server.doStart(Server.java:401)
+	at org.eclipse.jetty.util.component.AbstractLifeCycle.start(AbstractLifeCycle.java:73)
+	at spark.embeddedserver.jetty.EmbeddedJettyServer.ignite(EmbeddedJettyServer.java:154)
+	at spark.Service.lambda$init$2(Service.java:633)
+	at java.base/java.lang.Thread.run(Thread.java:1583)
+Caused by: java.net.BindException: Address already in use
+	at java.base/sun.nio.ch.Net.bind0(Native Method)
+	at java.base/sun.nio.ch.Net.bind(Net.java:565)
+	at java.base/sun.nio.ch.ServerSocketChannelImpl.netBind(ServerSocketChannelImpl.java:344)
+	at java.base/sun.nio.ch.ServerSocketChannelImpl.bind(ServerSocketChannelImpl.java:301)
+	at java.base/sun.nio.ch.ServerSocketAdaptor.bind(ServerSocketAdaptor.java:89)
+	at org.eclipse.jetty.server.ServerConnector.openAcceptChannel(ServerConnector.java:344)
+	... 9 common frames omitted
+2026-01-08 18:42:42.515 [Thread-6] INFO  com.trading.hf.Main - Shutting down... saving state.
+2026-01-08 18:42:42.514 [WebSocketConnectReadThread-41] ERROR c.t.hf.streamer.TVMarketDataStreamer - WebSocket error:
+java.net.ConnectException: Connection refused
+	at java.base/sun.nio.ch.Net.connect0(Native Method)
+	at java.base/sun.nio.ch.Net.connect(Net.java:589)
+	at java.base/sun.nio.ch.Net.connect(Net.java:578)
+	at java.base/sun.nio.ch.NioSocketImpl.connect(NioSocketImpl.java:583)
+	at java.base/java.net.Socket.connect(Socket.java:751)
+	at org.java_websocket.client.WebSocketClient.run(WebSocketClient.java:475)
+	at java.base/java.lang.Thread.run(Thread.java:1583)
+2026-01-08 18:42:42.515 [WebSocketConnectReadThread-41] INFO  c.t.hf.streamer.TVMarketDataStreamer - Disconnected from Python Bridge. Reason: Connection refused
+2026-01-08 18:42:42.528 [Thread-6] INFO  c.trading.hf.state.RecoveryManager - Engine state saved.

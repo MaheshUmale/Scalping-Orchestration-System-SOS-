@@ -26,6 +26,7 @@
     }
   ],
   "execution": {
+    "side": "SHORT",
     "entry": "var.mother_l - 0.1",
     "sl": "var.mother_h",
     "tp": "entry - (risk * tp_mult)"

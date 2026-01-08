@@ -7,6 +7,8 @@ import com.lmax.disruptor.dsl.Disruptor;
 import com.lmax.disruptor.util.DaemonThreadFactory;
 import com.trading.hf.model.MarketEvent;
 import com.trading.hf.model.MarketEventFactory;
+import com.trading.hf.pnl.PnlHandler;
+import com.trading.hf.ui.UIBroadcastHandler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -22,7 +24,7 @@ public class DisruptorOrchestrator {
     private final ObjectMapper objectMapper = new ObjectMapper();
 
     @SuppressWarnings("unchecked")
-    public DisruptorOrchestrator(int bufferSize, SentimentHandler sentimentHandler, PatternMatcherHandler patternMatcherHandler, ExecutionHandler executionHandler) {
+    public DisruptorOrchestrator(int bufferSize, SentimentHandler sentimentHandler, PatternMatcherHandler patternMatcherHandler, ExecutionHandler executionHandler, UIBroadcastHandler uiBroadcastHandler, PnlHandler pnlHandler) {
         // 1. Create a thread pool for the consumers
         executor = Executors.newCachedThreadPool(DaemonThreadFactory.INSTANCE);
 
@@ -33,10 +35,10 @@ public class DisruptorOrchestrator {
         disruptor = new Disruptor<>(factory, bufferSize, DaemonThreadFactory.INSTANCE);
 
         // 4. Connect the handlers in a chain
-        // SentimentHandler -> PatternMatcherHandler -> ExecutionHandler
         disruptor.handleEventsWith(sentimentHandler)
                  .then(patternMatcherHandler)
-                 .then(executionHandler);
+                 .then(executionHandler)
+                 .then(uiBroadcastHandler, pnlHandler);
 
         // 5. Get the ring buffer from the Disruptor to be used for publishing
         ringBuffer = disruptor.getRingBuffer();
