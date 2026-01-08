@@ -239,5 +239,116 @@ This is how we define a pattern like your **BRF** or a **Head & Shoulders** gene
 ### Discussion:
 
 We have the **Bridge** code (Python) and the **Streamer** (Java). The missing core is the **`GenericPatternManager`** in Java which can interpret these JSON phases.
+
+
+## ---
+I apologize for the oversight. You are right; a system of this complexity requires a high-fidelity record of every logic gate, structural decision, and rationalized "why" behind the architecture.
+
+Below is the **Master Architectural & Strategy Document**. It covers the end-to-end vision we have built together, from the multi-tier Python Bridge to the Regime-Adaptive Java Engine.
+
+---
+
+# **SOS Framework: Strategic & Technical Master Blueprint**
+
+## **1. Executive Summary & Design Philosophy**
+
+The **Scalping Orchestration System (SOS)** is a cross-platform (Python/Java) algorithmic trading framework. Its core purpose is to solve the "Rigidity Problem" in retail trading bots by introducing **Market Regime Awareness** and **Decoupled Strategy Logic**.
+
+### **The Rationale**
+
+* **Decoupling:** By separating the data bridge (Python) from the engine (Java), we ensure that API failures or heavy math (OI analysis) do not stall the high-speed execution engine.
+* **State Machine Patterns:** Moving from `if-else` blocks to JSON state machines allows the system to remember "the footprint of big players" across time, rather than just reacting to the current tick.
+* **Regime Sensitivity:** The system acknowledges that a "Bullish Pattern" in a "Bearish Market" is a low-probability trade and must be either vetoed or traded with reduced size.
+
+---
+
+## **2. The Data Tier: Python Bridge (`tv_data_bridge.py`)**
+
+This tier acts as the "Single Source of Truth." It handles data redundancy and sophisticated sentiment calculations.
+
+### **Features & Logic**
+
+* **Tiered Redundancy:** 1.  *Primary:* Upstox API (Institutional speed).
+2.  *Secondary:* TradingView Premium (Stability).
+3.  *Tertiary:* Public Scrapers/Yahoo Finance (Emergency fallback).
+* **Sentiment Aggregation:** * **PCR Velocity:** Calculates not just the Put-Call Ratio, but how fast it is changing ().
+* **OI Barrier Analysis:** Identifies "Walls" where big players are writing Call/Put options to cap market movement.
+* **Market Breadth:** Tracks the Advance-Decline ratio of the Nifty 50/BankNifty constituents.
+
+
+
+---
+
+## **3. The Logic Tier: Java Engine (`ScalpingSignalEngine`)**
+
+The Engine is the "Command & Control" center. It consumes the Bridge's data and matches it against the Strategy Playbook.
+
+### **State-Based Pattern Matching (The "Footprint" Logic)**
+
+Patterns are broken into **Phases** to mirror institutional behavior:
+
+1. **Phase 1: Setup (The Anchor):** Identification of a "Big Player" move (e.g., a high-volume Mother Candle with wicks).
+2. **Phase 2: Validation (The Trap):** Waiting for a breakout that fails to follow through. This is the "Shakeout" phase where retail traders are trapped.
+3. **Phase 3: Trigger (The Rejection):** Finding Dojis or weak rejection candles within the range of the Anchor.
+4. **Phase 4: Execution:** Entering only when sellers/buyers retake control, ensuring momentum is back on our side.
+
+### **The 7-State Regime Controller**
+
+The engine maintains a "Global Market Mood" that modifies every strategy:
+
+1. **Complete Bullish:** Aggressive buys, disable shorts.
+2. **Bullish:** Prefer buys, tight stops for shorts.
+3. **Sideways to Bullish:** Scalp buys, avoid trend-following.
+4. **Sideways:** Mean reversion only, tight TP, 50% quantity.
+5. **Sideways to Bearish:** Scalp shorts.
+6. **Bearish:** Prefer shorts.
+7. **Complete Bearish:** Aggressive shorts, disable buys.
+
+---
+
+## **4. The Contract: Bridge-to-Engine Interface**
+
+The "Contract" defines exactly how the two worlds talk. This ensures that if you change your Python script, the Java engine doesn't break.
+
+### **JSON Update Schema**
+
+* **`type: "MARKET_UPDATE"`**: Sends the OHLC of the closed candle.
+* **`type: "SENTIMENT_UPDATE"`**: Sends the current PCR, Breadth, and Regime string.
+* **`type: "OPTION_CHAIN"`**: Sends Strike-wise Delta and OI Change.
+
+---
+
+## **5. Strategy Abstraction: The JSON Playbook**
+
+This is the most critical innovation. We are moving all "Hardcoded" patterns into external JSON files.
+
+### **Pattern Schema Features**
+
+* **Variable Capture:** The ability to save a value (`var.anchor_high = candle.high`) and reference it 10 candles later.
+* **Regime Overrides:** A section within the JSON that says: *"If Regime is SIDEWAYS, change TP from 2.0 to 1.0."*
+* **Sentiment Gates:** A "Veto" logic that says: *"Do not trigger this Short pattern if `pcr_velocity` is positive."*
+
+---
+
+## **6. Rationalizing the Trade Execution (Entry/SL/TP)**
+
+* **Entry:** Usually defined as a "Break of the Trigger Candle" (+/- a buffer like 0.1) to ensure momentum.
+* **Stop Loss (SL):** Defined by the **Structural Anchor** (e.g., the high/low of the Mother Candle), not a random percentage.
+* **Take Profit (TP):** Adjusted dynamically.
+* *Trending:* Trail the stop to capture the big move.
+* *Sideways:* Hit-and-run at 1:1 Risk/Reward.
+
+
+
+---
+
+## **7. Roadmap: Next Steps**
+
+1. **Java Registry Implementation:** Create the `PatternDefinition` and `StateTracker` classes.
+2. **Logic Parser:** Implement the code that evaluates strings like `"candle.close < var.mother_low"`.
+3. **Regime Integration:** Link the Python Bridge's Breadth/PCR data to the Java Engine's position-sizing logic.
+
+**Summary Conclusion:** We have designed a system that thinks like a trader (Regimes and Patterns) but executes like a machine (Decoupled and Data-Redundant).
+ 
  
 
