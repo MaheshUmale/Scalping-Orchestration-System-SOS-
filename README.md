@@ -349,6 +349,255 @@ This is the most critical innovation. We are moving all "Hardcoded" patterns int
 3. **Regime Integration:** Link the Python Bridge's Breadth/PCR data to the Java Engine's position-sizing logic.
 
 **Summary Conclusion:** We have designed a system that thinks like a trader (Regimes and Patterns) but executes like a machine (Decoupled and Data-Redundant).
+
+## ===
+This pseudo-code logic provides a comprehensive architectural and operational view of the entire **SOS (Scalping Orchestration System)**. It integrates the Python Bridge's multi-tier redundancy with the Java Engine's regime-adaptive state machines, incorporating the state management and recovery features previously discussed.
+
+---
+
+# **1. Python Bridge Logic (`tv_data_bridge.py`)**
+
+The bridge handles data collection, sentiment calculation, and broadcasting. It serves as the system's "Sensory Array".
+
+```python
+CLASS PythonBridge:
+    FUNCTION __init__():
+        LOAD symbol_master
+        INITIALIZE Upstox_Client, TV_Screener, NSE_API_Client
+        INITIALIZE Trendlyne_Database_Connection
+
+    ASYNC FUNCTION start_service():
+        START_TASKS(
+            broadcast_candles(),        # Price Data
+            broadcast_sentiment(),      # PCR & Regime
+            broadcast_option_chain(),   # OI Walls
+            broadcast_market_breadth()  # Advances/Declines
+        )
+
+    ASYNC FUNCTION broadcast_sentiment():
+        WHILE system_is_active:
+            # Multi-tier PCR calculation
+            pcr = FETCH_PCR_FROM_NSE() or FETCH_FROM_TRENDLYNE_DB()
+            pcr_velocity = (pcr - last_pcr) / time_delta
+            
+            # Regime Determination
+            breadth = FETCH_ADVANCE_DECLINE_RATIO()
+            market_regime = CALCULATE_REGIME(pcr, pcr_velocity, breadth)
+            
+            SEND_TO_JAVA_ENGINE({
+                "type": "SENTIMENT_UPDATE",
+                "pcr": pcr,
+                "velocity": pcr_velocity,
+                "regime": market_regime
+            })
+            SLEEP(60)
+
+    ASYNC FUNCTION broadcast_candles():
+        WHILE market_is_open:
+            # Tiered Redundancy for data integrity
+            candle_data = FETCH_UPSTOX() or FETCH_TV_PREMIUM() or FETCH_YAHOO()
+            
+            SEND_TO_JAVA_ENGINE({
+                "type": "CANDLE_UPDATE",
+                "data": candle_data
+            })
+            SLEEP(60)
+
+```
+
+---
+
+# **2. Java Engine Logic (`ScalpingSignalEngine.java`)**
+
+The engine acts as the "Decision Brain," managing the state of multiple patterns and symbols.
+
+```java
+CLASS ScalpingSignalEngine:
+    // Memory and Persistence
+    Map<String, List<VolumeBar>> historyMap;
+    Map<String, Map<String, PatternState>> symbolPatternStates;
+    Regime currentRegime;
+
+    FUNCTION onMessageReceived(JSON message):
+        SWITCH(message.type):
+            CASE "SENTIMENT_UPDATE":
+                UPDATE_GLOBAL_REGIME(message.regime);
+            CASE "CANDLE_UPDATE":
+                PROCESS_ALL_PATTERNS(message.data);
+            CASE "SYNC_RECOVERY":
+                RECONSTRUCT_STATE(message.history_data);
+
+    FUNCTION processAllPatterns(Candle candle):
+        symbol = candle.getSymbol();
+        historyMap.get(symbol).add(candle);
+        
+        // Iterate through all JSON-defined patterns for this symbol
+        FOR EACH pattern IN strategyPlaybook:
+            stateTracker = symbolPatternStates.get(symbol, pattern.id);
+            
+            // 1. Regime Veto
+            IF (pattern.isForbiddenIn(currentRegime)):
+                stateTracker.reset();
+                CONTINUE;
+
+            // 2. State Machine Progress
+            CURRENT_PHASE = stateTracker.getPhase();
+            
+            SWITCH(CURRENT_PHASE):
+                PHASE SETUP:
+                    IF (EVALUATE(pattern.setup_cond, candle)):
+                        stateTracker.captureVars(pattern.setup_vars);
+                        stateTracker.moveTo(VALIDATION);
+                
+                PHASE VALIDATION:
+                    IF (EVALUATE(pattern.validation_cond, candle)):
+                        stateTracker.moveTo(TRIGGER);
+                    ELSE IF (TIMEOUT_REACHED):
+                        stateTracker.reset();
+
+                PHASE TRIGGER:
+                    IF (EVALUATE(pattern.trigger_cond, candle)):
+                        EXECUTE_TRADE(symbol, pattern, stateTracker.getCapturedVars());
+                        stateTracker.reset();
+
+```
+
+---
+
+# **3. State Management & Recovery Logic**
+
+Ensures the system survives crashes and maintains temporal integrity.
+
+```java
+CLASS RecoveryManager:
+    FUNCTION onStartup():
+        // Solve the "Amnesia Problem"
+        SEND_TO_BRIDGE("REQUEST_HISTORY_SYNC");
+        
+    FUNCTION handleHistorySync(JSON historyPacket):
+        FOR EACH candle IN historyPacket:
+            // Feed historical candles through the engine to "Replay" patterns
+            engine.onVolumeBar(candle, isHistorical = true);
+        
+    FUNCTION checkTemporalIntegrity(Message msg):
+        // Solve the "Ghost Signal" problem
+        IF (CURRENT_TIME - msg.timestamp > 5_SECONDS):
+            LOG_WARNING("Stale data detected. Ignoring message.");
+            RETURN false;
+        RETURN true;
+
+```
+
+---
+
+# **4. Order Execution Logic**
+
+Handles the "Contract" between strategy intent and broker API.
+
+```java
+CLASS OrderOrchestrator:
+    FUNCTION executeTrade(Symbol symbol, Pattern pattern, Variables capturedVars):
+        // 1. Position Sizing based on Regime
+        riskMultiplier = currentRegime.getRiskMod(); # e.g., 0.5 for Sideways
+        finalQuantity = calculateBaseQty(capturedVars.stopLoss) * riskMultiplier;
+        
+        // 2. Map Generic Symbol to Broker Instrument (Upstox)
+        brokerKey = instrumentMapper.findATM(symbol, pattern.side);
+        
+        // 3. Dispatch Atomic Order
+        orderResult = brokerClient.placeOrder(
+            key = brokerKey,
+            qty = finalQuantity,
+            type = "LIMIT",
+            price = capturedVars.entryPrice
+        );
+        
+        IF (orderResult.success):
+            monitorExits(orderResult.orderID, pattern, capturedVars);
+
+```
+
+---
+
+### **System Data Flow Summary**
+
+1. **Ingestion:** Python Bridge fetches redundant data.
+2. **Broadcasting:** Bridge sends `MARKET_UPDATE` and `SENTIMENT_UPDATE` to Java.
+3. **State Logic:** Java Engine updates internal `PatternState` trackers and captures variables (like `mother_high`).
+4. **Execution:** When `TRIGGER` phase is met, the Engine adjusts quantity for the current `Regime` and executes via Upstox.
+
+## ======
+
+In the previous pseudo-code, the **LMAX Disruptor architecture** was not explicitly implemented as a class; rather, its principles were implied in the "Logic Interaction" section regarding how the system handles high-concurrency state transitions without latency.
+
+To integrate it properly into the **Java Orchestrator**, we need to move away from traditional `BlockingQueues` or heavy `synchronized` blocks. The Disruptor pattern uses a **Ring Buffer** to ensure that data from the **Python Bridge** is processed by the **Pattern Engine** and **Execution Manager** in a lock-free, sequential manner.
+
+Here is the updated pseudo-code logic explicitly incorporating the **Disruptor Architecture**:
+
+### **1. The Disruptor Ring Buffer (The Central Nervous System)**
+
+Instead of the `TVMarketDataStreamer` calling the engine directly, it "publishes" events to a pre-allocated Ring Buffer.
+
+```java
+// Logic for Central Dispatcher using Disruptor
+CLASS MarketEventDisruptor:
+    RingBuffer<MarketEvent> ringBuffer;
+
+    FUNCTION onBridgeMessage(JSON msg):
+        // Lock-free publishing to the ring
+        long sequence = ringBuffer.next();
+        MarketEvent event = ringBuffer.get(sequence);
+        
+        // Populate pre-allocated event object (Zero Garbage)
+        event.setType(msg.type);
+        event.setPayload(msg.data);
+        event.setTimestamp(msg.ts);
+        
+        ringBuffer.publish(sequence);
+
+```
+
+### **2. Parallel Consumer Chains (The "Gating" Logic)**
+
+In LMAX architecture, multiple consumers (Handlers) process the same event in a specific order without contention.
+
+```java
+// Handler 1: Update Global Market Context
+CLASS SentimentHandler implements EventHandler<MarketEvent>:
+    FUNCTION onEvent(event):
+        IF (event.type == "SENTIMENT_UPDATE"):
+            GlobalRegime.set(event.regime);
+
+// Handler 2: Pattern State Machine (Depends on Handler 1)
+CLASS PatternMatcherHandler implements EventHandler<MarketEvent>:
+    FUNCTION onEvent(event):
+        IF (event.type == "CANDLE_UPDATE"):
+            FOR EACH symbol_pattern IN activeTrackers:
+                symbol_pattern.evaluate(event.candle, GlobalRegime.get());
+
+// Handler 3: Execution & Risk (Depends on Handler 2)
+CLASS ExecutionHandler implements EventHandler<MarketEvent>:
+    FUNCTION onEvent(event):
+        IF (PatternMatcherHandler.hasTriggered(event.symbol)):
+            Orchestrator.execute(event.signal);
+
+```
+
+### **3. Why this is added to the SOS Project**
+
+* **Mechanical Sympathy**: By using the Ring Buffer, the Java Engine avoids the "Race Conditions" identified during reanalysis. Each symbol's state transition happens in a deterministic sequence.
+* **Zero-Lock Concurrency**: The `PatternMatcherHandler` can process NIFTY and BANKNIFTY candles simultaneously from the same buffer without needing `synchronized` blocks that slow down scalping execution.
+* **State Recovery**: The Ring Buffer acts as a short-term memory. If the `ExecutionHandler` lags, the events stay in the buffer until processed, preventing the "Ghost Signal" problem where the system skips a trigger due to a thread being blocked.
+
+### **4. Updated Operational Flow**
+
+1. **Python Bridge** pushes data  **TVMarketDataStreamer** receives it.
+2. **Streamer** translates JSON to a `MarketEvent` and pushes to the **Disruptor Ring Buffer**.
+3. **Consumer 1** updates the **7-State Regime**.
+4. **Consumer 2** (Pattern Engine) uses the updated Regime to check the **JSON Phases** (Setup  Validation  Trigger).
+5. **Consumer 3** (Order Manager) fires the trade to the broker only after the previous two handlers have finished their logic for that specific millisecond.
+
+
  
  
 
