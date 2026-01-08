@@ -4,8 +4,13 @@ import com.trading.hf.core.*;
 import com.trading.hf.execution.OrderOrchestrator;
 import com.trading.hf.model.PatternState;
 import com.trading.hf.patterns.PatternStateMachine;
+import com.trading.hf.pnl.PnlHandler;
+import com.trading.hf.pnl.PortfolioManager;
 import com.trading.hf.state.RecoveryManager;
 import com.trading.hf.streamer.TVMarketDataStreamer;
+import com.trading.hf.ui.UIBroadcastHandler;
+import com.trading.hf.ui.UISWebSocketServer;
+import com.trading.hf.ui.WebServer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -20,38 +25,54 @@ public class Main {
     public static void main(String[] args) {
         // 1. Initialize core components
         RecoveryManager recoveryManager = new RecoveryManager();
-        OrderOrchestrator orderOrchestrator = new OrderOrchestrator();
 
-        // 2. Set up the Disruptor handlers
+        // 2. Start UI Servers
+        WebServer webServer = new WebServer();
+        webServer.start();
+        UISWebSocketServer uiWebSocketServer = new UISWebSocketServer(8081);
+        uiWebSocketServer.start();
+
+        PortfolioManager portfolioManager = new PortfolioManager(uiWebSocketServer);
+        OrderOrchestrator orderOrchestrator = new OrderOrchestrator(portfolioManager);
+
+        // 3. Set up the Disruptor handlers
         SentimentHandler sentimentHandler = new SentimentHandler();
         PatternMatcherHandler patternMatcherHandler = new PatternMatcherHandler();
         ExecutionHandler executionHandler = new ExecutionHandler(orderOrchestrator);
+        UIBroadcastHandler uiBroadcastHandler = new UIBroadcastHandler(uiWebSocketServer);
+        PnlHandler pnlHandler = new PnlHandler(portfolioManager);
 
-        // 3. Initialize and start the Disruptor orchestrator
+        // 4. Initialize the Disruptor orchestrator
         int bufferSize = Config.getInt("disruptor.bufferSize", 1024);
         DisruptorOrchestrator orchestrator = new DisruptorOrchestrator(
                 bufferSize,
                 sentimentHandler,
                 patternMatcherHandler,
-                executionHandler
+                executionHandler,
+                uiBroadcastHandler,
+                pnlHandler
         );
-        orchestrator.start();
-        log.info("DisruptorOrchestrator started with buffer size {}.", bufferSize);
-
-        // 4. Load previous state (if any)
-        patternMatcherHandler.restoreState(recoveryManager.loadState());
 
         // 5. Add a shutdown hook to save the state on exit
         Runtime.getRuntime().addShutdownHook(new Thread(() -> {
             log.info("Shutting down... saving state.");
-            // Convert the map of state machines to a map of states for persistence
-            Map<String, PatternState> statesToSave = patternMatcherHandler.getActiveStateMachines().entrySet().stream()
-                    .collect(Collectors.toMap(Map.Entry::getKey, e -> e.getValue().getState()));
-            recoveryManager.saveState(statesToSave);
-            orchestrator.shutdown();
+            if (patternMatcherHandler != null && recoveryManager != null && orchestrator != null) {
+                // Convert the map of state machines to a map of states for persistence
+                Map<String, PatternState> statesToSave = patternMatcherHandler.getActiveStateMachines().entrySet().stream()
+                        .collect(Collectors.toMap(Map.Entry::getKey, e -> e.getValue().getState()));
+                recoveryManager.saveState(statesToSave);
+                orchestrator.shutdown();
+            }
         }));
 
-        // 6. Connect to the Python bridge
+        // 6. Start the Disruptor
+        orchestrator.start();
+        log.info("DisruptorOrchestrator started with buffer size {}.", bufferSize);
+
+        // 7. Load previous state (if any)
+        patternMatcherHandler.restoreState(recoveryManager.loadState());
+
+        // 8. Connect to the Python bridge
         try {
             String websocketUri = Config.get("websocket.uri");
             URI uri = new URI(websocketUri);

@@ -127,11 +127,20 @@ public class PatternDefinition {
     }
 
     public static class Execution {
+        private String side;
         private String entry;
         private String sl;
         private String tp;
 
         // Getters and setters
+        public String getSide() {
+            return side;
+        }
+
+        public void setSide(String side) {
+            this.side = side;
+        }
+
         public String getEntry() {
             return entry;
         }
