@@ -598,6 +598,92 @@ CLASS ExecutionHandler implements EventHandler<MarketEvent>:
 5. **Consumer 3** (Order Manager) fires the trade to the broker only after the previous two handlers have finished their logic for that specific millisecond.
 
 
- 
+ ### -------------------
+
+ To implement the architecture we have discussed, including the **LMAX Disruptor** for lock-free concurrency, the **Python Bridge** for data redundancy, and the **JSON-based Pattern Engine**, the project requires a highly decoupled structure.
+
+Below is the project organization and the logical data flow that connects these components.
+
+---
+
+## **1. Project Directory Structure**
+
+The project is split into the **Data Tier** (Python) and the **Logic Tier** (Java).
+
+### **A. Python Data Bridge (`/sos-bridge`)**
+
+* **`tv_data_bridge.py`**: The main WebSocket server handling redundancy and broadcasting.
+* **`NSEAPICLient.py`**: Handles direct communication with the NSE for PCR and Breadth data.
+* **`SymbolMaster.py`**: Maps generic symbols (e.g., NIFTY) to broker-specific keys (e.g., Upstox).
+* **`backfill_trendlyne.py`**: Manages the SQLite database for historical option chain recovery.
+* **`config.py`**: Stores API tokens (Upstox) and environment variables.
+
+### **B. Java Trading Engine (`/sos-engine`)**
+
+* **`com.trading.hf.core`**:
+* **`DisruptorOrchestrator.java`**: Sets up the Ring Buffer and consumer chains.
+* **`GlobalRegimeController.java`**: Maintains the 7-state market sentiment.
+
+
+* **`com.trading.hf.streamer`**:
+* **`TVMarketDataStreamer.java`**: The WebSocket client that feeds the Ring Buffer.
+
+
+* **`com.trading.hf.patterns`**:
+* **`GenericPatternParser.java`**: Loads JSON strategy files.
+* **`PatternStateMachine.java`**: Manages "Step" transitions and variable capture.
+
+
+* **`com.trading.hf.model`**:
+* **`VolumeBar.java`**: Data object for candles and indicators.
+* **`MarketEvent.java`**: The pre-allocated event object used in the Ring Buffer.
+
+
+* **`resources/strategies/`**: Folder containing `.json` strategy files (e.g., `BRF_Short.json`).
+
+---
+
+## **2. Logical Data Flow (LMAX Disruptor Model)**
+
+The system operates in a linear, non-blocking pipeline to ensure that sentiment is always updated before a pattern is evaluated.
+
+### **Step 1: Ingestion & Normalization**
+
+1. **Python Bridge** fetches data from Upstox, NSE, or TradingView fallbacks.
+2. Data is packaged as a JSON `MARKET_UPDATE` or `SENTIMENT_UPDATE` and sent via WebSocket.
+3. **`TVMarketDataStreamer`** receives the JSON and translates it into a pre-allocated **`MarketEvent`** in the Disruptor Ring Buffer.
+
+### **Step 2: Sequential Processing (The Pipeline)**
+
+The Disruptor ensures these handlers run in order for every single event:
+
+* **Handler A (Regime Update):** Reads the sentiment data (PCR, Breadth) and updates the **`GlobalRegimeController`**. This sets the "sensitivity" for all other logic.
+* **Handler B (Pattern Matching):** * Iterates through all active JSON patterns.
+* Checks if the current candle triggers a **Setup**, **Validation**, or **Trigger** phase.
+* If a Setup is hit, it captures variables like `mother_high` in the **`PatternStateMachine`**.
+
+
+* **Handler C (Execution Engine):** * If Handler B flags a "Trigger," this handler checks the current Regime conviction.
+* It adjusts order quantity (e.g., 50% for Sideways, 120% for Complete Trending).
+* It dispatches the order to the broker.
+
+
+
+### **Step 3: State Persistence & Recovery**
+
+* Every 5 minutes, a **Persistence Handler** takes a snapshot of the `PatternStateMachine` variables and saves them to a local disk.
+* Upon restart, the engine requests a "Backfill" from the Python Bridge to re-simulate the morning's price action and restore the state of active patterns.
+
+---
+
+## **3. Logical Flow of a Trade (Example: BRF Short)**
+
+| Component | Action |
+| --- | --- |
+| **Python Bridge** | Detects PCR falling and Breadth turning negative; broadcasts `SENTIMENT_UPDATE`. |
+| **Java Regime Handler** | Sets global state to **"Bearish"**. |
+| **Java Pattern Handler** | JSON Step 1 (Mother Candle) was captured 10 mins ago. Current candle triggers Step 3 (Trigger). |
+| **Java Execution Handler** | Sees "Bearish" regime permits shorting; calculates entry at `mother_low - 0.1` and fires order. |
+
  
 
