@@ -1,63 +1,45 @@
-2026-01-08 18:42:42.329 [main] INFO  s.s.StaticFilesConfiguration - StaticResourceHandler configured with folder = /public
-2026-01-08 18:42:42.340 [main] INFO  com.trading.hf.ui.WebServer - Web server started on port 8080
-2026-01-08 18:42:42.378 [WebSocketSelector-26] ERROR o.j.server.WebSocketServer - Shutdown due to fatal error
-java.net.BindException: Address already in use
-	at java.base/sun.nio.ch.Net.bind0(Native Method)
-	at java.base/sun.nio.ch.Net.bind(Net.java:565)
-	at java.base/sun.nio.ch.ServerSocketChannelImpl.netBind(ServerSocketChannelImpl.java:344)
-	at java.base/sun.nio.ch.ServerSocketChannelImpl.bind(ServerSocketChannelImpl.java:301)
-	at java.base/sun.nio.ch.ServerSocketAdaptor.bind(ServerSocketAdaptor.java:89)
-	at org.java_websocket.server.WebSocketServer.doSetupSelectorAndServerThread(WebSocketServer.java:583)
-	at org.java_websocket.server.WebSocketServer.run(WebSocketServer.java:383)
+2026-01-12 04:16:06.600 [main] INFO  s.s.StaticFilesConfiguration - StaticResourceHandler configured with folder = /public
+2026-01-12 04:16:06.612 [main] INFO  com.trading.hf.ui.WebServer - Web server started on port 8080
+2026-01-12 04:16:06.638 [WebSocketSelector-26] INFO  c.trading.hf.ui.UISWebSocketServer - UI WebSocket server started on port 8081
+2026-01-12 04:16:06.645 [Thread-0] INFO  org.eclipse.jetty.util.log - Logging initialized @735ms to org.eclipse.jetty.util.log.Slf4jLog
+2026-01-12 04:16:06.648 [main] INFO  com.trading.hf.Main - DisruptorOrchestrator started with buffer size 1024.
+2026-01-12 04:16:06.702 [Thread-0] INFO  s.e.jetty.EmbeddedJettyServer - == Spark has ignited ...
+2026-01-12 04:16:06.703 [Thread-0] INFO  s.e.jetty.EmbeddedJettyServer - >> Listening on 0.0.0.0:8080
+2026-01-12 04:16:06.706 [Thread-0] INFO  org.eclipse.jetty.server.Server - jetty-9.4.48.v20220622; built: 2022-06-21T20:42:25.880Z; git: 6b67c5719d1f4371b33655ff2d047d24e171e49a; jvm 21.0.8+9-Ubuntu-0ubuntu124.04.1
+2026-01-12 04:16:06.740 [main] INFO  c.trading.hf.state.RecoveryManager - Engine state loaded.
+2026-01-12 04:16:06.763 [Thread-0] INFO  org.eclipse.jetty.server.session - DefaultSessionIdManager workerName=node0
+2026-01-12 04:16:06.764 [Thread-0] INFO  org.eclipse.jetty.server.session - No SessionScavenger set, using defaults
+2026-01-12 04:16:06.765 [Thread-0] INFO  org.eclipse.jetty.server.session - node0 Scavenging every 600000ms
+2026-01-12 04:16:06.766 [main] INFO  com.trading.hf.Main - Connecting to Python Bridge at ws://localhost:8765
+2026-01-12 04:16:06.777 [Thread-0] INFO  o.e.jetty.server.AbstractConnector - Started ServerConnector@14721e00{HTTP/1.1, (http/1.1)}{0.0.0.0:8080}
+2026-01-12 04:16:06.777 [Thread-0] INFO  org.eclipse.jetty.server.Server - Started @868ms
+2026-01-12 04:16:06.786 [WebSocketConnectReadThread-43] INFO  c.t.hf.streamer.TVMarketDataStreamer - Connected to Python Bridge at ws://localhost:8765
+2026-01-12 04:16:25.420 [Thread-7] INFO  c.t.hf.core.GlobalRegimeController - Market regime updated to: SIDEWAYS
+2026-01-12 04:16:57.408 [Thread-7] INFO  c.t.hf.core.GlobalRegimeController - Market regime updated to: SIDEWAYS
+2026-01-12 04:16:58.309 [WebSocketConnectReadThread-43] ERROR c.t.hf.core.DisruptorOrchestrator - Error processing message from bridge: {"type": "OPTION_CHAIN_UPDATE", "timestamp": 1768191418305, "data": {"symbol": "NIFTY", "chain": [{"strike": 24300.0, "call_oi": 520, "put_oi": 1036750, "call_oi_chg": 0, "put_oi_chg": 427115}, {"strike": 24350.0, "call_oi": 195, "put_oi": 379535, "call_oi_chg": 0, "put_oi_chg": 219505}, {"strike": 24400.0, "call_oi": 390, "put_oi": 1381575, "call_oi_chg": 0, "put_oi_chg": 598845}, {"strike": 24450.0, "call_oi": 260, "put_oi": 380575, "call_oi_chg": 0, "put_oi_chg": 123565}, {"strike": 24500.0, "call_oi": 9685, "put_oi": 6723145, "call_oi_chg": 845, "put_oi_chg": 1331200}, {"strike": 24550.0, "call_oi": 195, "put_oi": 522080, "call_oi_chg": 0, "put_oi_chg": 247260}, {"strike": 24600.0, "call_oi": 5850, "put_oi": 2610790, "call_oi_chg": 2210, "put_oi_chg": 476255}, {"strike": 24650.0, "call_oi": 650, "put_oi": 812565, "call_oi_chg": 130, "put_oi_chg": 296270}, {"strike": 24700.0, "call_oi": 2210, "put_oi": 2161965, "call_oi_chg": 0, "put_oi_chg": 450645}, {"strike": 24750.0, "call_oi": 1105, "put_oi": 643890, "call_oi_chg": 0, "put_oi_chg": 156455}, {"strike": 24800.0, "call_oi": 5070, "put_oi": 4877340, "call_oi_chg": 65, "put_oi_chg": 1224340}, {"strike": 24850.0, "call_oi": 1170, "put_oi": 1330485, "call_oi_chg": 0, "put_oi_chg": 781040}, {"strike": 24900.0, "call_oi": 2730, "put_oi": 3667690, "call_oi_chg": 195, "put_oi_chg": 1643135}, {"strike": 24950.0, "call_oi": 910, "put_oi": 1543685, "call_oi_chg": 195, "put_oi_chg": 825110}, {"strike": 25000.0, "call_oi": 219700, "put_oi": 9148100, "call_oi_chg": 102895, "put_oi_chg": 1888575}, {"strike": 25050.0, "call_oi": 2340, "put_oi": 1611545, "call_oi_chg": 1170, "put_oi_chg": 800995}, {"strike": 25100.0, "call_oi": 24375, "put_oi": 3644160, "call_oi_chg": 3640, "put_oi_chg": 1467180}, {"strike": 25150.0, "call_oi": 14170, "put_oi": 2437045, "call_oi_chg": 7540, "put_oi_chg": 745160}, {"strike": 25200.0, "call_oi": 195910, "put_oi": 8999835, "call_oi_chg": 163540, "put_oi_chg": 2054325}, {"strike": 25250.0, "call_oi": 36790, "put_oi": 3519295, "call_oi_chg": 17420, "put_oi_chg": 1327755}, {"strike": 25300.0, "call_oi": 249470, "put_oi": 6333405, "call_oi_chg": 164580, "put_oi_chg": 2358200}, {"strike": 25350.0, "call_oi": 97890, "put_oi": 4096040, "call_oi_chg": 64675, "put_oi_chg": 2530970}, {"strike": 25400.0, "call_oi": 703755, "put_oi": 10859680, "call_oi_chg": 559780, "put_oi_chg": 3421730}, {"strike": 25450.0, "call_oi": 476970, "put_oi": 6230445, "call_oi_chg": 426465, "put_oi_chg": 3935555}, {"strike": 25500.0, "call_oi": 4287725, "put_oi": 20095595, "call_oi_chg": 3524300, "put_oi_chg": 9310925}, {"strike": 25550.0, "call_oi": 4017650, "put_oi": 13288990, "call_oi_chg": 3817385, "put_oi_chg": 10423530}, {"strike": 25600.0, "call_oi": 14850485, "put_oi": 18099770, "call_oi_chg": 13780715, "put_oi_chg": 10659545}, {"strike": 25650.0, "call_oi": 10277865, "put_oi": 7503210, "call_oi_chg": 8542560, "put_oi_chg": 2056405}, {"strike": 25700.0, "call_oi": 18544500, "put_oi": 8421595, "call_oi_chg": 12413505, "put_oi_chg": 1144650}, {"strike": 25750.0, "call_oi": 9465560, "put_oi": 2639780, "call_oi_chg": 5383820, "put_oi_chg": -250965}, {"strike": 25800.0, "call_oi": 16073265, "put_oi": 3397875, "call_oi_chg": 6517550, "put_oi_chg": -561925}, {"strike": 25850.0, "call_oi": 8067020, "put_oi": 1644955, "call_oi_chg": 2812810, "put_oi_chg": -166075}, {"strike": 25900.0, "call_oi": 14619280, "put_oi": 3797040, "call_oi_chg": 1985035, "put_oi_chg": -224835}, {"strike": 25950.0, "call_oi": 8363745, "put_oi": 1424605, "call_oi_chg": 1956240, "put_oi_chg": -126490}, {"strike": 26000.0, "call_oi": 19991530, "put_oi": 3214380, "call_oi_chg": -595855, "put_oi_chg": -315380}, {"strike": 26050.0, "call_oi": 10187970, "put_oi": 834600, "call_oi_chg": 161135, "put_oi_chg": -197860}, {"strike": 26100.0, "call_oi": 16512665, "put_oi": 1988610, "call_oi_chg": 1244945, "put_oi_chg": -209105}, {"strike": 26150.0, "call_oi": 8255260, "put_oi": 702910, "call_oi_chg": -749970, "put_oi_chg": -40950}, {"strike": 26200.0, "call_oi": 15356770, "put_oi": 1734720, "call_oi_chg": 9100, "put_oi_chg": -110695}, {"strike": 26250.0, "call_oi": 5870345, "put_oi": 380900, "call_oi_chg": -324610, "put_oi_chg": -40885}, {"strike": 26300.0, "call_oi": 13021840, "put_oi": 1086995, "call_oi_chg": 1360970, "put_oi_chg": -39650}, {"strike": 26350.0, "call_oi": 4352725, "put_oi": 231335, "call_oi_chg": -147615, "put_oi_chg": -11310}, {"strike": 26400.0, "call_oi": 9365005, "put_oi": 488735, "call_oi_chg": 1528865, "put_oi_chg": -116870}, {"strike": 26450.0, "call_oi": 2772965, "put_oi": 94965, "call_oi_chg": -152230, "put_oi_chg": -1235}, {"strike": 26500.0, "call_oi": 14360840, "put_oi": 295880, "call_oi_chg": 52650, "put_oi_chg": -67990}, {"strike": 26550.0, "call_oi": 2769455, "put_oi": 51155, "call_oi_chg": -386100, "put_oi_chg": -325}, {"strike": 26600.0, "call_oi": 7300085, "put_oi": 100100, "call_oi_chg": -1658930, "put_oi_chg": -1105}, {"strike": 26650.0, "call_oi": 2721550, "put_oi": 34385, "call_oi_chg": 243880, "put_oi_chg": 1365}, {"strike": 26700.0, "call_oi": 6816485, "put_oi": 91585, "call_oi_chg": 697840, "put_oi_chg": -715}, {"strike": 26750.0, "call_oi": 1827085, "put_oi": 23335, "call_oi_chg": -329095, "put_oi_chg": -65}, {"strike": 26800.0, "call_oi": 7533370, "put_oi": 90545, "call_oi_chg": 751010, "put_oi_chg": -2925}]}}
+java.lang.IllegalArgumentException: No enum constant com.trading.hf.model.MarketEvent.MessageType.OPTION_CHAIN_UPDATE
+	at java.base/java.lang.Enum.valueOf(Enum.java:293)
+	at com.trading.hf.model.MarketEvent$MessageType.valueOf(MarketEvent.java:12)
+	at com.trading.hf.core.DisruptorOrchestrator.onBridgeMessage(DisruptorOrchestrator.java:60)
+	at com.trading.hf.streamer.TVMarketDataStreamer.onMessage(TVMarketDataStreamer.java:29)
+	at org.java_websocket.client.WebSocketClient.onWebsocketMessage(WebSocketClient.java:644)
+	at org.java_websocket.drafts.Draft_6455.processFrameText(Draft_6455.java:986)
+	at org.java_websocket.drafts.Draft_6455.processFrame(Draft_6455.java:910)
+	at org.java_websocket.WebSocketImpl.decodeFrames(WebSocketImpl.java:402)
+	at org.java_websocket.WebSocketImpl.decode(WebSocketImpl.java:234)
+	at org.java_websocket.client.WebSocketClient.run(WebSocketClient.java:527)
 	at java.base/java.lang.Thread.run(Thread.java:1583)
-2026-01-08 18:42:42.381 [WebSocketSelector-26] ERROR c.trading.hf.ui.UISWebSocketServer - UI WebSocket error
-java.net.BindException: Address already in use
-	at java.base/sun.nio.ch.Net.bind0(Native Method)
-	at java.base/sun.nio.ch.Net.bind(Net.java:565)
-	at java.base/sun.nio.ch.ServerSocketChannelImpl.netBind(ServerSocketChannelImpl.java:344)
-	at java.base/sun.nio.ch.ServerSocketChannelImpl.bind(ServerSocketChannelImpl.java:301)
-	at java.base/sun.nio.ch.ServerSocketAdaptor.bind(ServerSocketAdaptor.java:89)
-	at org.java_websocket.server.WebSocketServer.doSetupSelectorAndServerThread(WebSocketServer.java:583)
-	at org.java_websocket.server.WebSocketServer.run(WebSocketServer.java:383)
+2026-01-12 04:16:58.651 [WebSocketConnectReadThread-43] ERROR c.t.hf.core.DisruptorOrchestrator - Error processing message from bridge: {"type": "OPTION_CHAIN_UPDATE", "timestamp": 1768191418649, "data": {"symbol": "BANKNIFTY", "chain": [{"strike": 56100.0, "call_oi": 0, "put_oi": 12000, "call_oi_chg": 0, "put_oi_chg": 240}, {"strike": 56200.0, "call_oi": 270, "put_oi": 17100, "call_oi_chg": 0, "put_oi_chg": 840}, {"strike": 56300.0, "call_oi": 120, "put_oi": 25830, "call_oi_chg": 0, "put_oi_chg": 3120}, {"strike": 56400.0, "call_oi": 210, "put_oi": 27840, "call_oi_chg": 0, "put_oi_chg": 960}, {"strike": 56500.0, "call_oi": 22920, "put_oi": 250290, "call_oi_chg": 0, "put_oi_chg": 14130}, {"strike": 56600.0, "call_oi": 60, "put_oi": 38580, "call_oi_chg": 0, "put_oi_chg": 7380}, {"strike": 56700.0, "call_oi": 30, "put_oi": 23220, "call_oi_chg": 0, "put_oi_chg": 330}, {"strike": 56800.0, "call_oi": 30, "put_oi": 19710, "call_oi_chg": 0, "put_oi_chg": 2190}, {"strike": 56900.0, "call_oi": 480, "put_oi": 26280, "call_oi_chg": 0, "put_oi_chg": 1680}, {"strike": 57000.0, "call_oi": 62130, "put_oi": 496140, "call_oi_chg": -360, "put_oi_chg": 10830}, {"strike": 57100.0, "call_oi": 150, "put_oi": 28230, "call_oi_chg": 0, "put_oi_chg": 4740}, {"strike": 57200.0, "call_oi": 300, "put_oi": 39840, "call_oi_chg": 0, "put_oi_chg": 1530}, {"strike": 57300.0, "call_oi": 1080, "put_oi": 25350, "call_oi_chg": 0, "put_oi_chg": 1200}, {"strike": 57400.0, "call_oi": 300, "put_oi": 44880, "call_oi_chg": 0, "put_oi_chg": 3030}, {"strike": 57500.0, "call_oi": 30060, "put_oi": 434940, "call_oi_chg": 30, "put_oi_chg": 14460}, {"strike": 57600.0, "call_oi": 4500, "put_oi": 41040, "call_oi_chg": 0, "put_oi_chg": 5310}, {"strike": 57700.0, "call_oi": 450, "put_oi": 64950, "call_oi_chg": 0, "put_oi_chg": 5550}, {"strike": 57800.0, "call_oi": 360, "put_oi": 64260, "call_oi_chg": -30, "put_oi_chg": -2550}, {"strike": 57900.0, "call_oi": 1170, "put_oi": 73620, "call_oi_chg": 0, "put_oi_chg": 12690}, {"strike": 58000.0, "call_oi": 78780, "put_oi": 810660, "call_oi_chg": 2100, "put_oi_chg": 16380}, {"strike": 58100.0, "call_oi": 3810, "put_oi": 139590, "call_oi_chg": 0, "put_oi_chg": 8910}, {"strike": 58200.0, "call_oi": 4170, "put_oi": 97320, "call_oi_chg": 0, "put_oi_chg": 3420}, {"strike": 58300.0, "call_oi": 3000, "put_oi": 59160, "call_oi_chg": 30, "put_oi_chg": -8910}, {"strike": 58400.0, "call_oi": 7860, "put_oi": 72330, "call_oi_chg": 90, "put_oi_chg": -2430}, {"strike": 58500.0, "call_oi": 74070, "put_oi": 618900, "call_oi_chg": 8640, "put_oi_chg": 24750}, {"strike": 58600.0, "call_oi": 16770, "put_oi": 83880, "call_oi_chg": 600, "put_oi_chg": 5340}, {"strike": 58700.0, "call_oi": 13410, "put_oi": 105000, "call_oi_chg": 750, "put_oi_chg": 6600}, {"strike": 58800.0, "call_oi": 23430, "put_oi": 148980, "call_oi_chg": 5340, "put_oi_chg": 13410}, {"strike": 58900.0, "call_oi": 37830, "put_oi": 148590, "call_oi_chg": 13380, "put_oi_chg": 11190}, {"strike": 59000.0, "call_oi": 364890, "put_oi": 1068810, "call_oi_chg": 46470, "put_oi_chg": 142620}, {"strike": 59100.0, "call_oi": 100920, "put_oi": 209130, "call_oi_chg": 47460, "put_oi_chg": 66120}, {"strike": 59200.0, "call_oi": 127260, "put_oi": 233850, "call_oi_chg": 29550, "put_oi_chg": 39180}, {"strike": 59300.0, "call_oi": 173400, "put_oi": 244890, "call_oi_chg": 66180, "put_oi_chg": 35610}, {"strike": 59400.0, "call_oi": 189120, "put_oi": 229500, "call_oi_chg": 69930, "put_oi_chg": 17010}, {"strike": 59500.0, "call_oi": 1696440, "put_oi": 1891800, "call_oi_chg": 98010, "put_oi_chg": 36660}, {"strike": 59600.0, "call_oi": 210180, "put_oi": 159120, "call_oi_chg": 23940, "put_oi_chg": -9600}, {"strike": 59700.0, "call_oi": 247800, "put_oi": 161970, "call_oi_chg": 1500, "put_oi_chg": -18810}, {"strike": 59800.0, "call_oi": 274080, "put_oi": 146190, "call_oi_chg": -2940, "put_oi_chg": -27720}, {"strike": 59900.0, "call_oi": 240720, "put_oi": 103650, "call_oi_chg": 7200, "put_oi_chg": -12210}, {"strike": 60000.0, "call_oi": 1690020, "put_oi": 845580, "call_oi_chg": 43890, "put_oi_chg": -29430}, {"strike": 60100.0, "call_oi": 224220, "put_oi": 67740, "call_oi_chg": -17220, "put_oi_chg": -3930}, {"strike": 60200.0, "call_oi": 294900, "put_oi": 76290, "call_oi_chg": -19770, "put_oi_chg": -8310}, {"strike": 60300.0, "call_oi": 266070, "put_oi": 56640, "call_oi_chg": -10230, "put_oi_chg": -2730}, {"strike": 60400.0, "call_oi": 170670, "put_oi": 49020, "call_oi_chg": -7200, "put_oi_chg": -540}, {"strike": 60500.0, "call_oi": 618840, "put_oi": 173760, "call_oi_chg": 20610, "put_oi_chg": -3990}, {"strike": 60600.0, "call_oi": 113340, "put_oi": 56550, "call_oi_chg": 4920, "put_oi_chg": -90}, {"strike": 60700.0, "call_oi": 120690, "put_oi": 31800, "call_oi_chg": -10170, "put_oi_chg": -930}, {"strike": 60800.0, "call_oi": 141120, "put_oi": 20160, "call_oi_chg": 11910, "put_oi_chg": 0}, {"strike": 60900.0, "call_oi": 87210, "put_oi": 37380, "call_oi_chg": 360, "put_oi_chg": 0}, {"strike": 61000.0, "call_oi": 803970, "put_oi": 131160, "call_oi_chg": 19560, "put_oi_chg": -240}, {"strike": 61100.0, "call_oi": 75600, "put_oi": 6600, "call_oi_chg": -3390, "put_oi_chg": 0}, {"strike": 61200.0, "call_oi": 96690, "put_oi": 6090, "call_oi_chg": -6390, "put_oi_chg": 0}, {"strike": 61300.0, "call_oi": 91740, "put_oi": 6450, "call_oi_chg": -10980, "put_oi_chg": 0}, {"strike": 61400.0, "call_oi": 76020, "put_oi": 2190, "call_oi_chg": -3840, "put_oi_chg": 0}, {"strike": 61500.0, "call_oi": 514200, "put_oi": 22320, "call_oi_chg": -7110, "put_oi_chg": 60}, {"strike": 61600.0, "call_oi": 78750, "put_oi": 1500, "call_oi_chg": 1020, "put_oi_chg": 0}, {"strike": 61700.0, "call_oi": 64290, "put_oi": 900, "call_oi_chg": 2640, "put_oi_chg": 0}, {"strike": 61800.0, "call_oi": 112590, "put_oi": 1680, "call_oi_chg": -840, "put_oi_chg": 0}, {"strike": 61900.0, "call_oi": 62760, "put_oi": 1440, "call_oi_chg": -870, "put_oi_chg": 0}]}}
+java.lang.IllegalArgumentException: No enum constant com.trading.hf.model.MarketEvent.MessageType.OPTION_CHAIN_UPDATE
+	at java.base/java.lang.Enum.valueOf(Enum.java:293)
+	at com.trading.hf.model.MarketEvent$MessageType.valueOf(MarketEvent.java:12)
+	at com.trading.hf.core.DisruptorOrchestrator.onBridgeMessage(DisruptorOrchestrator.java:60)
+	at com.trading.hf.streamer.TVMarketDataStreamer.onMessage(TVMarketDataStreamer.java:29)
+	at org.java_websocket.client.WebSocketClient.onWebsocketMessage(WebSocketClient.java:644)
+	at org.java_websocket.drafts.Draft_6455.processFrameText(Draft_6455.java:986)
+	at org.java_websocket.drafts.Draft_6455.processFrame(Draft_6455.java:910)
+	at org.java_websocket.WebSocketImpl.decodeFrames(WebSocketImpl.java:402)
+	at org.java_websocket.WebSocketImpl.decode(WebSocketImpl.java:234)
+	at org.java_websocket.client.WebSocketClient.run(WebSocketClient.java:527)
 	at java.base/java.lang.Thread.run(Thread.java:1583)
-2026-01-08 18:42:42.387 [main] INFO  com.trading.hf.Main - DisruptorOrchestrator started with buffer size 1024.
-2026-01-08 18:42:42.397 [Thread-0] INFO  org.eclipse.jetty.util.log - Logging initialized @799ms to org.eclipse.jetty.util.log.Slf4jLog
-2026-01-08 18:42:42.450 [Thread-0] INFO  s.e.jetty.EmbeddedJettyServer - == Spark has ignited ...
-2026-01-08 18:42:42.451 [Thread-0] INFO  s.e.jetty.EmbeddedJettyServer - >> Listening on 0.0.0.0:8080
-2026-01-08 18:42:42.454 [Thread-0] INFO  org.eclipse.jetty.server.Server - jetty-9.4.48.v20220622; built: 2022-06-21T20:42:25.880Z; git: 6b67c5719d1f4371b33655ff2d047d24e171e49a; jvm 21.0.8+9-Ubuntu-0ubuntu124.04.1
-2026-01-08 18:42:42.467 [main] INFO  c.trading.hf.state.RecoveryManager - Engine state loaded.
-2026-01-08 18:42:42.499 [Thread-0] INFO  org.eclipse.jetty.server.session - DefaultSessionIdManager workerName=node0
-2026-01-08 18:42:42.499 [Thread-0] INFO  org.eclipse.jetty.server.session - No SessionScavenger set, using defaults
-2026-01-08 18:42:42.502 [Thread-0] INFO  org.eclipse.jetty.server.session - node0 Scavenging every 660000ms
-2026-01-08 18:422026-01-08 18:42:58.935 [WebSocketWorker-27] INFO  c.trading.hf.ui.UISWebSocketServer - UI WebSocket connection opened: /[0:0:0:0:0:0:0:1]:52186
-2026-01-08 18:42:59.114 [WebSocketSelector-30] INFO  c.trading.hf.ui.UISWebSocketServer - UI WebSocket connection closed: /[0:0:0:0:0:0:0:1]:52186
-or.java:349)
-	at org.eclipse.jetty.server.ServerConnector.open(ServerConnector.java:310)
-	at org.eclipse.jetty.server.AbstractNetworkConnector.doStart(AbstractNetworkConnector.java:80)
-	at org.eclipse.jetty.server.ServerConnector.doStart(ServerConnector.java:234)
-	at org.eclipse.jetty.util.component.AbstractLifeCycle.start(AbstractLifeCycle.java:73)
-	at org.eclipse.jetty.server.Server.doStart(Server.java:401)
-	at org.eclipse.jetty.util.component.AbstractLifeCycle.start(AbstractLifeCycle.java:73)
-	at spark.embeddedserver.jetty.EmbeddedJettyServer.ignite(EmbeddedJettyServer.java:154)
-	at spark.Service.lambda$init$2(Service.java:633)
-	at java.base/java.lang.Thread.run(Thread.java:1583)
-Caused by: java.net.BindException: Address already in use
-	at java.base/sun.nio.ch.Net.bind0(Native Method)
-	at java.base/sun.nio.ch.Net.bind(Net.java:565)
-	at java.base/sun.nio.ch.ServerSocketChannelImpl.netBind(ServerSocketChannelImpl.java:344)
-	at java.base/sun.nio.ch.ServerSocketChannelImpl.bind(ServerSocketChannelImpl.java:301)
-	at java.base/sun.nio.ch.ServerSocketAdaptor.bind(ServerSocketAdaptor.java:89)
-	at org.eclipse.jetty.server.ServerConnector.openAcceptChannel(ServerConnector.java:344)
-	... 9 common frames omitted
-2026-01-08 18:42:42.515 [Thread-6] INFO  com.trading.hf.Main - Shutting down... saving state.
-2026-01-08 18:42:42.514 [WebSocketConnectReadThread-41] ERROR c.t.hf.streamer.TVMarketDataStreamer - WebSocket error:
-java.net.ConnectException: Connection refused
-	at java.base/sun.nio.ch.Net.connect0(Native Method)
-	at java.base/sun.nio.ch.Net.connect(Net.java:589)
-	at java.base/sun.nio.ch.Net.connect(Net.java:578)
-	at java.base/sun.nio.ch.NioSocketImpl.connect(NioSocketImpl.java:583)
-	at java.base/java.net.Socket.connect(Socket.java:751)
-	at org.java_websocket.client.WebSocketClient.run(WebSocketClient.java:475)
-	at java.base/java.lang.Thread.run(Thread.java:1583)
-2026-01-08 18:42:42.515 [WebSocketConnectReadThread-41] INFO  c.t.hf.streamer.TVMarketDataStreamer - Disconnected from Python Bridge. Reason: Connection refused
-2026-01-08 18:42:42.528 [Thread-6] INFO  c.trading.hf.state.RecoveryManager - Engine state saved.
+2026-01-12 04:17:29.668 [Thread-7] INFO  c.t.hf.core.GlobalRegimeController - Market regime updated to: SIDEWAYS
