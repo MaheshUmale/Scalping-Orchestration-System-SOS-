@@ -10,8 +10,7 @@ public class MarketEvent {
     private PatternStateMachine triggeredMachine; // Field to carry the signal
 
     public enum MessageType {
-        CANDLE_UPDATE,
-        SENTIMENT_UPDATE,
+        MARKET_UPDATE,
         OPTION_CHAIN_UPDATE
         // Add other types as needed
     }

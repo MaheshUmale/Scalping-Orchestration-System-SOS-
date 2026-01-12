@@ -23,7 +23,7 @@ public class OptionChainHandler implements EventHandler<MarketEvent> {
         if (event.getType() == MarketEvent.MessageType.OPTION_CHAIN_UPDATE) {
             try {
                 List<OptionChainData> chainData = objectMapper.convertValue(
-                    event.getPayload(),
+                    event.getPayload().get("chain"),
                     new TypeReference<List<OptionChainData>>() {}
                 );
 

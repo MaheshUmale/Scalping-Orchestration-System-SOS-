@@ -33,13 +33,14 @@ public class PatternMatcherHandler implements EventHandler<MarketEvent> {
         // Clear any trigger from a previous event in the same slot
         event.setTriggeredMachine(null);
 
-        if (event.getType() == MarketEvent.MessageType.CANDLE_UPDATE) {
+        if (event.getType() == MarketEvent.MessageType.MARKET_UPDATE) {
             JsonNode payload = event.getPayload();
-            String symbol = payload.get("symbol").asText();
-            VolumeBar candle = objectMapper.treeToValue(payload.get("candle"), VolumeBar.class);
-            candle.setSymbol(symbol);
+            if (payload != null && payload.has("candle")) {
+                String symbol = payload.get("symbol").asText();
+                VolumeBar candle = objectMapper.treeToValue(payload.get("candle"), VolumeBar.class);
+                candle.setSymbol(symbol);
 
-            // For each defined pattern, check or create a state machine
+                // For each defined pattern, check or create a state machine
             for (PatternDefinition definition : patternDefinitions.values()) {
                 String machineKey = symbol + ":" + definition.getPatternId();
                 PatternStateMachine stateMachine = activeStateMachines.computeIfAbsent(machineKey,
@@ -55,6 +56,7 @@ public class PatternMatcherHandler implements EventHandler<MarketEvent> {
                     // We break after the first trigger for a symbol to avoid multiple signals
                     break;
                 }
+            }
             }
         }
     }
