@@ -15,6 +15,12 @@ public class OptionChainData {
     @JsonProperty("put_oi")
     private int putOi;
 
+    @JsonProperty("call_oi_chg")
+    private int callOiChg;
+
+    @JsonProperty("put_oi_chg")
+    private int putOiChg;
+
     public int getStrike() {
         return strike;
     }
@@ -37,5 +43,21 @@ public class OptionChainData {
 
     public void setPutOi(int putOi) {
         this.putOi = putOi;
+    }
+
+    public int getCallOiChg() {
+        return callOiChg;
+    }
+
+    public void setCallOiChg(int callOiChg) {
+        this.callOiChg = callOiChg;
+    }
+
+    public int getPutOiChg() {
+        return putOiChg;
+    }
+
+    public void setPutOiChg(int putOiChg) {
+        this.putOiChg = putOiChg;
     }
 }

@@ -59,12 +59,14 @@ public class DisruptorOrchestrator {
             JsonNode rootNode = objectMapper.readTree(jsonMessage);
             String typeStr = rootNode.get("type").asText();
             MarketEvent.MessageType messageType = MarketEvent.MessageType.valueOf(typeStr.toUpperCase());
-            JsonNode payload = rootNode.get("data"); // As per the contract
+            JsonNode payload = rootNode.get("data");
             long timestamp = rootNode.get("timestamp").asLong();
 
-            // Publish the event to the ring buffer
             ringBuffer.publishEvent((event, sequence, type, data, ts) -> {
                 event.setType(type);
+
+                // For MARKET_UPDATE, the payload is the nested 'data' object
+                // For other types, it might be different, but we'll stick to the contract
                 event.setPayload(data);
                 event.setTimestamp(ts);
             }, messageType, payload, timestamp);

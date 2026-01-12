@@ -1,5 +1,6 @@
 package com.trading.hf.pnl;
 
+import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.lmax.disruptor.EventHandler;
 import com.trading.hf.model.MarketEvent;
@@ -16,10 +17,13 @@ public class PnlHandler implements EventHandler<MarketEvent> {
 
     @Override
     public void onEvent(MarketEvent event, long sequence, boolean endOfBatch) throws Exception {
-        if (event.getType() == MarketEvent.MessageType.CANDLE_UPDATE) {
-            VolumeBar candle = objectMapper.treeToValue(event.getPayload().get("candle"), VolumeBar.class);
-            candle.setSymbol(event.getPayload().get("symbol").asText());
-            portfolioManager.onCandle(candle);
+        if (event.getType() == MarketEvent.MessageType.MARKET_UPDATE) {
+            JsonNode payload = event.getPayload();
+            if (payload != null && payload.has("candle")) {
+                VolumeBar candle = objectMapper.treeToValue(payload.get("candle"), VolumeBar.class);
+                candle.setSymbol(payload.get("symbol").asText());
+                portfolioManager.onCandle(candle);
+            }
         }
     }
 }
