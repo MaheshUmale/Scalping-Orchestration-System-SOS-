@@ -7,6 +7,7 @@ public class Sentiment {
     private int declines;
     private double oiWallAbove;
     private double oiWallBelow;
+    private String regime;
 
     // Getters and setters
     public double getPcr() {
@@ -55,5 +56,13 @@ public class Sentiment {
 
     public void setOiWallBelow(double oiWallBelow) {
         this.oiWallBelow = oiWallBelow;
+    }
+
+    public String getRegime() {
+        return regime;
+    }
+
+    public void setRegime(String regime) {
+        this.regime = regime;
     }
 }
