@@ -54,25 +54,36 @@ public class DisruptorOrchestrator {
         executor.shutdown();
     }
 
-    public void onBridgeMessage(String jsonMessage) {
-        try {
-            JsonNode rootNode = objectMapper.readTree(jsonMessage);
-            String typeStr = rootNode.get("type").asText();
-            MarketEvent.MessageType messageType = MarketEvent.MessageType.valueOf(typeStr.toUpperCase());
-            JsonNode payload = rootNode.get("data");
-            long timestamp = rootNode.get("timestamp").asLong();
+    public void onBridgeMessage(MarketEvent.MessageType messageType, JsonNode dataNode, long timestamp) {
+        ringBuffer.publishEvent((event, sequence) -> {
+            try {
+                event.setType(messageType);
+                event.setTimestamp(timestamp);
 
-            ringBuffer.publishEvent((event, sequence, type, data, ts) -> {
-                event.setType(type);
-
-                // For MARKET_UPDATE, the payload is the nested 'data' object
-                // For other types, it might be different, but we'll stick to the contract
-                event.setPayload(data);
-                event.setTimestamp(ts);
-            }, messageType, payload, timestamp);
-
-        } catch (Exception e) {
-            log.error("Error processing message from bridge: {}", jsonMessage, e);
-        }
+                switch (messageType) {
+                    case MARKET_UPDATE:
+                        event.setSymbol(dataNode.get("symbol").asText());
+                        event.setCandle(objectMapper.treeToValue(dataNode.get("candle"), com.trading.hf.model.VolumeBar.class));
+                        event.setSentiment(objectMapper.treeToValue(dataNode.get("sentiment"), com.trading.hf.model.Sentiment.class));
+                        break;
+                    case CANDLE_UPDATE:
+                        event.setSymbol(dataNode.get("symbol").asText());
+                        event.setCandle(objectMapper.treeToValue(dataNode.get("candle"), com.trading.hf.model.VolumeBar.class));
+                        break;
+                    case SENTIMENT_UPDATE:
+                        event.setSentiment(objectMapper.treeToValue(dataNode, com.trading.hf.model.Sentiment.class));
+                        break;
+                    case OPTION_CHAIN_UPDATE:
+                        event.setSymbol(dataNode.get("symbol").asText());
+                        event.setOptionChain(objectMapper.readerFor(new com.fasterxml.jackson.core.type.TypeReference<java.util.List<com.trading.hf.model.OptionChainData>>() {}).readValue(dataNode.get("chain")));
+                        break;
+                    default:
+                        log.warn("Unknown message type: {}", messageType);
+                        break;
+                }
+            } catch (Exception e) {
+                log.error("Error processing message in Disruptor event handler: {}", dataNode, e);
+            }
+        });
     }
 }
