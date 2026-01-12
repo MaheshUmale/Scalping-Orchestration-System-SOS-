@@ -11,10 +11,12 @@ public class SentimentHandler implements EventHandler<MarketEvent> {
         if (event.getType() == MarketEvent.MessageType.MARKET_UPDATE || event.getType() == MarketEvent.MessageType.SENTIMENT_UPDATE) {
             Sentiment sentiment = event.getSentiment();
             if (sentiment != null) {
-                // This is a placeholder for the actual regime calculation logic.
-                // In a real system, this would involve a more complex calculation
-                // based on the various sentiment fields.
-                String regime = determineRegime(sentiment);
+                String regime = sentiment.getRegime();
+                if (regime == null) {
+                    // Only determine regime if it wasn't provided
+                    regime = determineRegime(sentiment);
+                    sentiment.setRegime(regime);
+                }
                 GlobalRegimeController.setRegime(regime);
             }
         }
