@@ -24,7 +24,7 @@ public class DisruptorOrchestrator {
     private final ObjectMapper objectMapper = new ObjectMapper();
 
     @SuppressWarnings("unchecked")
-    public DisruptorOrchestrator(int bufferSize, SentimentHandler sentimentHandler, PatternMatcherHandler patternMatcherHandler, ExecutionHandler executionHandler, UIBroadcastHandler uiBroadcastHandler, PnlHandler pnlHandler) {
+    public DisruptorOrchestrator(int bufferSize, OptionChainHandler optionChainHandler, SentimentHandler sentimentHandler, PatternMatcherHandler patternMatcherHandler, ExecutionHandler executionHandler, UIBroadcastHandler uiBroadcastHandler, PnlHandler pnlHandler) {
         // 1. Create a thread pool for the consumers
         executor = Executors.newCachedThreadPool(DaemonThreadFactory.INSTANCE);
 
@@ -35,7 +35,8 @@ public class DisruptorOrchestrator {
         disruptor = new Disruptor<>(factory, bufferSize, DaemonThreadFactory.INSTANCE);
 
         // 4. Connect the handlers in a chain
-        disruptor.handleEventsWith(sentimentHandler)
+        disruptor.handleEventsWith(optionChainHandler)
+                 .then(sentimentHandler)
                  .then(patternMatcherHandler)
                  .then(executionHandler)
                  .then(uiBroadcastHandler, pnlHandler);

@@ -12,6 +12,7 @@ public class MarketEvent {
     public enum MessageType {
         CANDLE_UPDATE,
         SENTIMENT_UPDATE,
+        OPTION_CHAIN_UPDATE
         // Add other types as needed
     }
 

@@ -36,6 +36,7 @@ public class Main {
         OrderOrchestrator orderOrchestrator = new OrderOrchestrator(portfolioManager);
 
         // 3. Set up the Disruptor handlers
+        OptionChainHandler optionChainHandler = new OptionChainHandler();
         SentimentHandler sentimentHandler = new SentimentHandler();
         PatternMatcherHandler patternMatcherHandler = new PatternMatcherHandler();
         ExecutionHandler executionHandler = new ExecutionHandler(orderOrchestrator);
@@ -46,6 +47,7 @@ public class Main {
         int bufferSize = Config.getInt("disruptor.bufferSize", 1024);
         DisruptorOrchestrator orchestrator = new DisruptorOrchestrator(
                 bufferSize,
+                optionChainHandler,
                 sentimentHandler,
                 patternMatcherHandler,
                 executionHandler,
