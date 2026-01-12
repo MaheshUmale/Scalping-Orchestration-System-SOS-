@@ -33,30 +33,29 @@ public class PatternMatcherHandler implements EventHandler<MarketEvent> {
         // Clear any trigger from a previous event in the same slot
         event.setTriggeredMachine(null);
 
-        if (event.getType() == MarketEvent.MessageType.MARKET_UPDATE) {
-            JsonNode payload = event.getPayload();
-            if (payload != null && payload.has("candle")) {
-                String symbol = payload.get("symbol").asText();
-                VolumeBar candle = objectMapper.treeToValue(payload.get("candle"), VolumeBar.class);
+        if (event.getType() == MarketEvent.MessageType.MARKET_UPDATE || event.getType() == MarketEvent.MessageType.CANDLE_UPDATE) {
+            VolumeBar candle = event.getCandle();
+            if (candle != null) {
+                String symbol = event.getSymbol();
                 candle.setSymbol(symbol);
 
                 // For each defined pattern, check or create a state machine
-            for (PatternDefinition definition : patternDefinitions.values()) {
-                String machineKey = symbol + ":" + definition.getPatternId();
-                PatternStateMachine stateMachine = activeStateMachines.computeIfAbsent(machineKey,
-                        k -> new PatternStateMachine(definition, symbol));
+                for (PatternDefinition definition : patternDefinitions.values()) {
+                    String machineKey = symbol + ":" + definition.getPatternId();
+                    PatternStateMachine stateMachine = activeStateMachines.computeIfAbsent(machineKey,
+                            k -> new PatternStateMachine(definition, symbol));
 
-                // Evaluate the current candle against the state machine
-                stateMachine.evaluate(candle);
+                    // Evaluate the current candle against the state machine
+                    stateMachine.evaluate(candle);
 
-                // If the final phase is completed, pass the machine to the next handler
-                if (stateMachine.isTriggered()) {
-                    event.setTriggeredMachine(stateMachine);
-                    stateMachine.consumeTrigger(); // Reset trigger flag
-                    // We break after the first trigger for a symbol to avoid multiple signals
-                    break;
+                    // If the final phase is completed, pass the machine to the next handler
+                    if (stateMachine.isTriggered()) {
+                        event.setTriggeredMachine(stateMachine);
+                        stateMachine.consumeTrigger(); // Reset trigger flag
+                        // We break after the first trigger for a symbol to avoid multiple signals
+                        break;
+                    }
                 }
-            }
             }
         }
     }

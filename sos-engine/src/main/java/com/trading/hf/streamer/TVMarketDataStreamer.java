@@ -1,17 +1,26 @@
 package com.trading.hf.streamer;
 
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.trading.hf.core.DisruptorOrchestrator;
+import com.trading.hf.model.MarketEvent;
+import com.trading.hf.model.OptionChainData;
+import com.trading.hf.model.Sentiment;
+import com.trading.hf.model.VolumeBar;
 import org.java_websocket.client.WebSocketClient;
 import org.java_websocket.handshake.ServerHandshake;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.net.URI;
+import java.util.List;
 
 public class TVMarketDataStreamer extends WebSocketClient {
     private static final Logger log = LoggerFactory.getLogger(TVMarketDataStreamer.class);
 
     private final DisruptorOrchestrator disruptorOrchestrator;
+    private final ObjectMapper objectMapper = new ObjectMapper();
 
     public TVMarketDataStreamer(URI serverUri, DisruptorOrchestrator disruptorOrchestrator) {
         super(serverUri);
@@ -26,7 +35,23 @@ public class TVMarketDataStreamer extends WebSocketClient {
     @Override
     public void onMessage(String message) {
         log.debug("Received message: {}", message);
-        disruptorOrchestrator.onBridgeMessage(message);
+        try {
+            JsonNode rootNode = objectMapper.readTree(message);
+            String typeStr = rootNode.get("type").asText().toUpperCase();
+            MarketEvent.MessageType messageType;
+            try {
+                messageType = MarketEvent.MessageType.valueOf(typeStr);
+            } catch (IllegalArgumentException e) {
+                messageType = MarketEvent.MessageType.UNKNOWN;
+            }
+            JsonNode dataNode = rootNode.get("data");
+            long timestamp = rootNode.get("timestamp").asLong();
+
+            disruptorOrchestrator.onBridgeMessage(messageType, dataNode, timestamp);
+
+        } catch (Exception e) {
+            log.error("Error processing message: {}", message, e);
+        }
     }
 
     @Override
