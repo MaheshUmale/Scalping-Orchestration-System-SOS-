@@ -10,6 +10,7 @@ public class MarketEvent {
     private VolumeBar candle;
     private Sentiment sentiment;
     private List<OptionChainData> optionChain;
+    private java.util.Map<String, Double> screenerData; // For rvol, change_from_open
     private PatternStateMachine triggeredMachine; // Field to carry the signal
 
     public enum MessageType {
@@ -67,6 +68,14 @@ public class MarketEvent {
 
     public void setOptionChain(List<OptionChainData> optionChain) {
         this.optionChain = optionChain;
+    }
+
+    public java.util.Map<String, Double> getScreenerData() {
+        return screenerData;
+    }
+
+    public void setScreenerData(java.util.Map<String, Double> screenerData) {
+        this.screenerData = screenerData;
     }
 
     public PatternStateMachine getTriggeredMachine() {

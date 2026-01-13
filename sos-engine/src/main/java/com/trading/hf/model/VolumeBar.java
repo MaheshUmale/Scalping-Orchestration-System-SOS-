@@ -8,8 +8,16 @@ public class VolumeBar {
     private double low;
     private double close;
     private long volume;
+    private double atr;
 
     // Getters and setters
+    public double getATR() {
+        return atr;
+    }
+
+    public void setATR(double atr) {
+        this.atr = atr;
+    }
     public String getSymbol() {
         return symbol;
     }

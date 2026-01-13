@@ -3,12 +3,15 @@ package com.trading.hf.pnl;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.trading.hf.model.VolumeBar;
 import com.trading.hf.ui.UISWebSocketServer;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
 
 public class PortfolioManager {
+    private static final Logger log = LoggerFactory.getLogger(PortfolioManager.class);
 
     private final List<Trade> trades = new CopyOnWriteArrayList<>();
     private final UISWebSocketServer uiWebSocketServer;
@@ -18,8 +21,8 @@ public class PortfolioManager {
         this.uiWebSocketServer = uiWebSocketServer;
     }
 
-    public void newTrade(String symbol, double entry, double sl, double tp, double quantity, Trade.TradeSide side) {
-        trades.add(new Trade(symbol, entry, sl, tp, quantity, side));
+    public void newTrade(String symbol, double entry, double sl, double tp, double quantity, Trade.TradeSide side, String gate) {
+        trades.add(new Trade(symbol, entry, sl, tp, quantity, side, gate));
     }
 
     public void onCandle(VolumeBar candle) {
@@ -41,6 +44,12 @@ public class PortfolioManager {
                     if (close) {
                         trade.close(candle.getClose());
                         closedTrades.add(trade);
+                        String reason = (trade.getSide() == Trade.TradeSide.LONG) ? 
+                                (candle.getClose() >= trade.getTakeProfit() ? "TP_HIT" : "SL_HIT") :
+                                (candle.getClose() <= trade.getTakeProfit() ? "TP_HIT" : "SL_HIT");
+                        
+                        log.info("[EXIT_DATA] Side={}, Symbol={}, Price={}, Reason={}, PnL={}, Gate={}", 
+                                trade.getSide(), trade.getSymbol(), candle.getClose(), reason, trade.getPnl(), trade.getGate());
                     }
                 }
             }

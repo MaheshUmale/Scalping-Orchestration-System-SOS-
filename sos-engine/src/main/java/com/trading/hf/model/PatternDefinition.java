@@ -1,9 +1,11 @@
 package com.trading.hf.model;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import java.util.List;
 import java.util.Map;
 
+@JsonIgnoreProperties(ignoreUnknown = true)
 public class PatternDefinition {
 
     @JsonProperty("pattern_id")
@@ -52,6 +54,7 @@ public class PatternDefinition {
         this.execution = execution;
     }
 
+    @JsonIgnoreProperties(ignoreUnknown = true)
     public static class RegimeConfig {
         @JsonProperty("allow_entry")
         private boolean allowEntry = true;
@@ -59,6 +62,8 @@ public class PatternDefinition {
         private double tpMult = 1.0;
         @JsonProperty("quantity_mod")
         private double quantityMod = 1.0;
+        @JsonProperty("buffer_atr")
+        private double bufferAtr = 0.5;
 
         // Getters and setters
         public boolean isAllowEntry() {
@@ -84,8 +89,17 @@ public class PatternDefinition {
         public void setQuantityMod(double quantityMod) {
             this.quantityMod = quantityMod;
         }
+
+        public double getBufferAtr() {
+            return bufferAtr;
+        }
+
+        public void setBufferAtr(double bufferAtr) {
+            this.bufferAtr = bufferAtr;
+        }
     }
 
+    @JsonIgnoreProperties(ignoreUnknown = true)
     public static class Phase {
         private String id;
         private List<String> conditions;
@@ -126,11 +140,14 @@ public class PatternDefinition {
         }
     }
 
+    @JsonIgnoreProperties(ignoreUnknown = true)
     public static class Execution {
         private String side;
         private String entry;
         private String sl;
         private String tp;
+        @JsonProperty("option_selection")
+        private String optionSelection;
 
         // Getters and setters
         public String getSide() {
@@ -163,6 +180,14 @@ public class PatternDefinition {
 
         public void setTp(String tp) {
             this.tp = tp;
+        }
+
+        public String getOptionSelection() {
+            return optionSelection;
+        }
+
+        public void setOptionSelection(String optionSelection) {
+            this.optionSelection = optionSelection;
         }
     }
 }

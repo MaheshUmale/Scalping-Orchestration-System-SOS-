@@ -1,5 +1,6 @@
 package com.trading.hf.core;
 
+import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.lmax.disruptor.RingBuffer;
@@ -21,7 +22,8 @@ public class DisruptorOrchestrator {
     private final Disruptor<MarketEvent> disruptor;
     private final RingBuffer<MarketEvent> ringBuffer;
     private final ExecutorService executor;
-    private final ObjectMapper objectMapper = new ObjectMapper();
+    private final ObjectMapper objectMapper = new ObjectMapper()
+            .configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
 
     @SuppressWarnings("unchecked")
     public DisruptorOrchestrator(int bufferSize, OptionChainHandler optionChainHandler, SentimentHandler sentimentHandler, PatternMatcherHandler patternMatcherHandler, ExecutionHandler executionHandler, UIBroadcastHandler uiBroadcastHandler, PnlHandler pnlHandler) {

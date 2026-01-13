@@ -71,7 +71,13 @@ public class Main {
         orchestrator.start();
         log.info("DisruptorOrchestrator started with buffer size {}.", bufferSize);
 
-        // 7. Load previous state (if any)
+        // 7. Start Strategy Watcher for dynamic reloading
+        StrategyWatcher strategyWatcher = new StrategyWatcher(patternMatcherHandler);
+        Thread watcherThread = new Thread(strategyWatcher, "StrategyWatcher");
+        watcherThread.setDaemon(true);
+        watcherThread.start();
+
+        // 8. Load previous state (if any)
         patternMatcherHandler.restoreState(recoveryManager.loadState());
 
         // 8. Connect to the Python bridge

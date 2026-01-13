@@ -1,6 +1,7 @@
 package com.trading.hf.execution;
 
 import com.trading.hf.core.GlobalRegimeController;
+import com.trading.hf.core.PriceRegistry;
 import com.trading.hf.model.PatternDefinition;
 import com.trading.hf.model.PatternState;
 import com.trading.hf.pnl.PortfolioManager;
@@ -16,6 +17,7 @@ import java.util.Map;
 public class OrderOrchestrator {
     private static final Logger log = LoggerFactory.getLogger(OrderOrchestrator.class);
     private final PortfolioManager portfolioManager;
+    private final OptionContractResolver optionResolver = new OptionContractResolver();
 
     public OrderOrchestrator(PortfolioManager portfolioManager) {
         this.portfolioManager = portfolioManager;
@@ -35,6 +37,7 @@ public class OrderOrchestrator {
         // 3. Create the execution context for MVEL
         Map<String, Object> context = new HashMap<>();
         context.put("var", triggeredState.getCapturedVariables());
+        context.put("vars", triggeredState.getCapturedVariables());
         if (regimeConfig != null) {
             context.put("tp_mult", regimeConfig.getTpMult());
             context.put("quantity_mod", regimeConfig.getQuantityMod());
@@ -45,38 +48,57 @@ public class OrderOrchestrator {
 
         try {
             // 4. Evaluate entry and stop-loss first to calculate risk
-            double entryPrice = MVEL.eval(definition.getExecution().getEntry(), context, Double.class);
-            double stopLoss = MVEL.eval(definition.getExecution().getSl(), context, Double.class);
-            Trade.TradeSide side = Trade.TradeSide.valueOf(definition.getExecution().getSide());
+            double underlyingEntry = MVEL.eval(definition.getExecution().getEntry(), context, Double.class);
+            double underlyingSL = MVEL.eval(definition.getExecution().getSl(), context, Double.class);
+            Trade.TradeSide underlyingSide = Trade.TradeSide.valueOf(definition.getExecution().getSide());
 
-            double risk;
-            if (side == Trade.TradeSide.LONG) {
-                risk = entryPrice - stopLoss;
-            } else {
-                risk = stopLoss - entryPrice;
-            }
-            context.put("entry", entryPrice);
-            context.put("risk", risk);
+            double underlyingRisk = Math.abs(underlyingEntry - underlyingSL);
+            context.put("entry", underlyingEntry);
+            context.put("risk", underlyingRisk);
 
-            // 5. Now, evaluate take-profit
-            double takeProfit = MVEL.eval(definition.getExecution().getTp(), context, Double.class);
+            // 5. Evaluate underlying take-profit
+            double underlyingTP = MVEL.eval(definition.getExecution().getTp(), context, Double.class);
 
-            // 6. Calculate final quantity
-            double baseQuantity = 100; // This would typically be calculated based on risk
+            // 6. Calculate base underlying quantity
+            double baseQuantity = 100;
             double finalQuantity = baseQuantity * (double) context.get("quantity_mod");
 
-            log.info("--- EXECUTION TRIGGERED ---");
-            log.info("Pattern: {}", definition.getPatternId());
-            log.info("Symbol: {}", triggeredState.getSymbol());
-            log.info("Regime: {}", regime);
-            log.info("Side: {}", side);
-            log.info("Quantity: {}", finalQuantity);
-            log.info("Calculated Entry: {}", entryPrice);
-            log.info("Calculated SL: {}", stopLoss);
-            log.info("Calculated TP: {}", takeProfit);
+            String symbolToTrade = triggeredState.getSymbol();
+            double tradeEntry = underlyingEntry;
+            double tradeSL = underlyingSL;
+            double tradeTP = underlyingTP;
+            Trade.TradeSide tradeSide = underlyingSide;
+
+            // 7. Resolve to Option if it's NIFTY or BANKNIFTY (Exact match only to avoid triggering on options themselves)
+            if (symbolToTrade.equals("NIFTY") || symbolToTrade.equals("BANKNIFTY")) {
+                String optionSymbol = optionResolver.resolveATM(symbolToTrade, underlyingEntry, underlyingSide.name(), 0);
+                double optionPrice = PriceRegistry.getPrice(optionSymbol);
+                
+                if (optionPrice > 0) {
+                    log.info("Switching to OPTION Trade: {} -> {} @ {}", symbolToTrade, optionSymbol, optionPrice);
+                    symbolToTrade = optionSymbol;
+                    tradeEntry = optionPrice;
+                    tradeSide = Trade.TradeSide.LONG; // We are always BUYING the option (CE or PE)
+                    
+                    // Simple option exit logic: exit when underlying hits SL/TP levels 
+                    // To do this simply in current PortfolioManager, we set an wide SL/TP or estimate 
+                    // delta-based SL/TP on the option price itself.
+                    // For now, let's use a 50% relative risk logic for the option itself.
+                    double priceMovementFactor = Math.abs(underlyingTP - underlyingEntry) / underlyingEntry;
+                    double riskMovementFactor = Math.abs(underlyingSL - underlyingEntry) / underlyingEntry;
+                    
+                    tradeSL = tradeEntry * (1 - (riskMovementFactor * 5)); // Aggressive 5x levered SL
+                    tradeTP = tradeEntry * (1 + (priceMovementFactor * 5)); // Aggressive 5x levered TP
+                } else {
+                    log.warn("Option price for {} not found in PriceRegistry. Falling back to Underlying.", optionSymbol);
+                }
+            }
+
+            log.info("[EXEC_DATA] Side={}, Symbol={}, Qty={}, Price={}, SL={}, TP={}, Gate={}", 
+                    tradeSide, symbolToTrade, finalQuantity, tradeEntry, tradeSL, tradeTP, definition.getPatternId());
             log.info("--------------------------");
 
-            portfolioManager.newTrade(triggeredState.getSymbol(), entryPrice, stopLoss, takeProfit, finalQuantity, side);
+            portfolioManager.newTrade(symbolToTrade, tradeEntry, tradeSL, tradeTP, finalQuantity, tradeSide, definition.getPatternId());
 
         } catch (Exception e) {
             log.error("Error evaluating execution logic for pattern {}", definition.getPatternId(), e);

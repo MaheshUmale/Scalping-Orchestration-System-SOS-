@@ -26,7 +26,7 @@ public class GenericPatternParser {
                 InputStream in = getClass().getClassLoader().getResourceAsStream(directoryPath);
                 BufferedReader br = new BufferedReader(new InputStreamReader(in))) {
             String resource;
-            while ((resource = br.readLine()) != null) {
+            while (br != null && (resource = br.readLine()) != null) {
                 if (resource.endsWith(".json")) {
                     try (InputStream jsonStream = getClass().getClassLoader()
                             .getResourceAsStream(directoryPath + "/" + resource)) {
@@ -36,18 +36,39 @@ public class GenericPatternParser {
                         }
                         PatternDefinition definition = objectMapper.readValue(jsonStream, PatternDefinition.class);
                         patterns.put(definition.getPatternId(), definition);
-                        log.info("Loaded pattern: {}", definition.getPatternId());
+                        log.info("Loaded pattern from classpath: {}", definition.getPatternId());
                     } catch (IOException e) {
-                        log.error("Error parsing pattern file: {}", resource, e);
+                        log.error("Error parsing pattern file from classpath: {}", resource, e);
                     }
                 }
             }
-        } catch (IOException e) {
-            log.error("Could not read strategies from directory: {}", directoryPath, e);
-        } catch (NullPointerException e) {
-            log.error("Could not find the strategy resource directory: {}", directoryPath, e);
+        } catch (IOException | NullPointerException e) {
+            log.warn("Could not read strategies from classpath directory: {}. This might be expected if running from IDE.", directoryPath);
         }
 
+        return patterns;
+    }
+
+    public Map<String, PatternDefinition> loadPatternsFromDir(String dirPath) {
+        Map<String, PatternDefinition> patterns = new HashMap<>();
+        java.io.File folder = new java.io.File(dirPath);
+        if (!folder.exists() || !folder.isDirectory()) {
+            log.warn("External strategies directory does not exist or is not a directory: {}", dirPath);
+            return patterns;
+        }
+
+        java.io.File[] listOfFiles = folder.listFiles((dir, name) -> name.endsWith(".json"));
+        if (listOfFiles != null) {
+            for (java.io.File file : listOfFiles) {
+                try {
+                    PatternDefinition definition = objectMapper.readValue(file, PatternDefinition.class);
+                    patterns.put(definition.getPatternId(), definition);
+                    log.info("Loaded pattern from filesystem: {}", definition.getPatternId());
+                } catch (IOException e) {
+                    log.error("Error parsing pattern file from filesystem: {}", file.getName(), e);
+                }
+            }
+        }
         return patterns;
     }
 }

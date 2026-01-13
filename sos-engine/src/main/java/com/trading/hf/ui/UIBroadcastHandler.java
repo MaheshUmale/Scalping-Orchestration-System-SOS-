@@ -15,13 +15,12 @@ public class UIBroadcastHandler implements EventHandler<MarketEvent> {
 
     @Override
     public void onEvent(MarketEvent event, long sequence, boolean endOfBatch) throws Exception {
-        if (event.getTriggeredMachine() != null) {
-            try {
-                String jsonEvent = objectMapper.writeValueAsString(event);
-                webSocketServer.broadcast(jsonEvent);
-            } catch (Exception e) {
-                // Log the error, but don't stop the disruptor
-            }
+        // Broadcast ALL events to the UI so it's not empty
+        try {
+            String jsonEvent = objectMapper.writeValueAsString(event);
+            webSocketServer.broadcast(jsonEvent);
+        } catch (Exception e) {
+            // Log the error, but don't stop the disruptor
         }
     }
 }

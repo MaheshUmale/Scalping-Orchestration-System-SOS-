@@ -1,6 +1,7 @@
 package com.trading.hf.streamer;
 
 import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.trading.hf.core.DisruptorOrchestrator;
@@ -20,7 +21,8 @@ public class TVMarketDataStreamer extends WebSocketClient {
     private static final Logger log = LoggerFactory.getLogger(TVMarketDataStreamer.class);
 
     private final DisruptorOrchestrator disruptorOrchestrator;
-    private final ObjectMapper objectMapper = new ObjectMapper();
+    private final ObjectMapper objectMapper = new ObjectMapper()
+            .configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
 
     public TVMarketDataStreamer(URI serverUri, DisruptorOrchestrator disruptorOrchestrator) {
         super(serverUri);

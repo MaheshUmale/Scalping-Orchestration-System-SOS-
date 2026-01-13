@@ -22,6 +22,7 @@
             <div id="pnl"></div>
         </div>
     </div>
+    <div id="status" style="padding: 10px; font-weight: bold; color: red;">System Status: Waiting for data...</div>
     <script>
         const signals = document.getElementById('signals');
         const pnl = document.getElementById('pnl');
@@ -45,6 +46,13 @@
                     <p>Symbol: ${data.triggeredMachine.state.symbol}</p>
                 `;
                 signals.appendChild(signalElement);
+            } else if (data.type === 'MARKET_UPDATE' || data.type === 'CANDLE_UPDATE') {
+                 // Blink or update a status indicator
+                 const statusDiv = document.getElementById('status');
+                 if (statusDiv) {
+                     statusDiv.innerText = `System Live: Last Update at ${new Date(data.timestamp).toLocaleTimeString()} for ${data.symbol}`;
+                     statusDiv.style.color = 'green';
+                 }
             }
         };
 

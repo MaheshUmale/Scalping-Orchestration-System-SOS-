@@ -12,15 +12,17 @@ public class Trade {
     private final TradeSide side;
     private double pnl = 0.0;
     private boolean open = true;
+    private final String gate;
     private final long timestamp;
 
-    public Trade(String symbol, double entryPrice, double stopLoss, double takeProfit, double quantity, TradeSide side) {
+    public Trade(String symbol, double entryPrice, double stopLoss, double takeProfit, double quantity, TradeSide side, String gate) {
         this.symbol = symbol;
         this.entryPrice = entryPrice;
         this.stopLoss = stopLoss;
         this.takeProfit = takeProfit;
         this.quantity = quantity;
         this.side = side;
+        this.gate = gate;
         this.timestamp = System.currentTimeMillis();
     }
 
@@ -55,5 +57,8 @@ public class Trade {
 
     public TradeSide getSide() {
         return side;
+    }
+    public String getGate() {
+        return gate;
     }
 }

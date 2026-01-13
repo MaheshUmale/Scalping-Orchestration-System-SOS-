@@ -18,14 +18,32 @@ import java.util.concurrent.ConcurrentHashMap;
 public class PatternMatcherHandler implements EventHandler<MarketEvent> {
     private static final Logger log = LoggerFactory.getLogger(PatternMatcherHandler.class);
 
-    private final Map<String, PatternDefinition> patternDefinitions;
+    private volatile Map<String, PatternDefinition> patternDefinitions;
     private final Map<String, PatternStateMachine> activeStateMachines = new ConcurrentHashMap<>();
     private final ObjectMapper objectMapper = new ObjectMapper();
+    private final GenericPatternParser parser = new GenericPatternParser();
 
     public PatternMatcherHandler() {
         // Load all pattern definitions on startup
-        GenericPatternParser parser = new GenericPatternParser();
-        this.patternDefinitions = parser.loadPatterns("strategies");
+        reloadPatterns();
+    }
+
+    public synchronized void reloadPatterns() {
+        log.info("Reloading pattern definitions...");
+        Map<String, PatternDefinition> classpathPatterns = parser.loadPatterns("strategies");
+        
+        String externalPath = com.trading.hf.Config.get("strategies.external.path");
+        Map<String, PatternDefinition> externalPatterns = new java.util.HashMap<>();
+        if (externalPath != null) {
+            externalPatterns = parser.loadPatternsFromDir(externalPath);
+        }
+
+        // Merge patterns, external takes precedence if ID matches
+        Map<String, PatternDefinition> merged = new java.util.HashMap<>(classpathPatterns);
+        merged.putAll(externalPatterns);
+        
+        this.patternDefinitions = merged;
+        log.info("Total patterns loaded: {}", merged.size());
     }
 
     @Override
@@ -37,7 +55,19 @@ public class PatternMatcherHandler implements EventHandler<MarketEvent> {
             VolumeBar candle = event.getCandle();
             if (candle != null) {
                 String symbol = event.getSymbol();
+                if (symbol.equals("NIFTY") || symbol.equals("BANKNIFTY")) {
+                    log.info("Processing Index Candle: {} @ {}", symbol, candle.getClose());
+                }
                 candle.setSymbol(symbol);
+                PriceRegistry.updatePrice(symbol, candle.getClose());
+                
+                // Mock screener data if missing (TEMPORARY for testing)
+                if (event.getScreenerData() == null) {
+                    java.util.Map<String, Double> mockScreener = new java.util.HashMap<>();
+                    mockScreener.put("rvol", 3.0);
+                    mockScreener.put("change_from_open", 1.5);
+                    event.setScreenerData(mockScreener);
+                }
 
                 // For each defined pattern, check or create a state machine
                 for (PatternDefinition definition : patternDefinitions.values()) {
@@ -46,7 +76,7 @@ public class PatternMatcherHandler implements EventHandler<MarketEvent> {
                             k -> new PatternStateMachine(definition, symbol));
 
                     // Evaluate the current candle against the state machine
-                    stateMachine.evaluate(candle);
+                    stateMachine.evaluate(candle, event.getSentiment(), event.getScreenerData());
 
                     // If the final phase is completed, pass the machine to the next handler
                     if (stateMachine.isTriggered()) {
